@@ -131,9 +131,7 @@ export class WebKit implements BrowserType<WKBrowser> {
   }
 
   async connect(options: ConnectOptions): Promise<WKBrowser> {
-    return await platform.connectToWebsocket(options.wsEndpoint, transport => {
-      return WKBrowser.connect(transport, options.slowMo);
-    });
+    return WKBrowser.connect(await platform.connectToWebsocket(options.wsEndpoint), options.slowMo);
   }
 
   _defaultArgs(options: BrowserArgOptions = {}, launchType: LaunchType, userDataDir: string, port: number): string[] {

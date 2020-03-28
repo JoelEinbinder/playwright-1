@@ -312,12 +312,13 @@ export function guid(): string {
 
 // 'onmessage' handler must be installed synchronously when 'onopen' callback is invoked to
 // avoid missing incoming messages.
-export async function connectToWebsocket<T>(url: string, onopen: (transport: ConnectionTransport) => Promise<T>): Promise<T> {
+export async function connectToWebsocket(url: string): Promise<WebSocketTransport> {
   const transport = new WebSocketTransport(url);
-  return new Promise<T>((fulfill, reject) => {
-    transport._ws.addEventListener('open', async () => fulfill(await onopen(transport)));
+  await new Promise((fufill, reject) => {
+    transport._ws.addEventListener('open', fufill);
     transport._ws.addEventListener('error', event => reject(new Error('WebSocket error: ' + (event as ErrorEvent).message)));
   });
+  return transport;
 }
 
 class WebSocketTransport implements ConnectionTransport {
