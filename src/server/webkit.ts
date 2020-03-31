@@ -47,8 +47,9 @@ export class WebKit implements BrowserType<WKBrowser> {
 
   async launch(options: LaunchOptions = {}): Promise<WKBrowser> {
     assert(!(options as any).userDataDir, 'userDataDir option is not supported in `browserType.launch`. Use `browserType.launchPersistentContext` instead');
-    const { browserServer, transport } = await this._launchServer(options, 'local');
+    const { browserServer, transport, downloadsPath } = await this._launchServer(options, 'local');
     const browser = await WKBrowser.connect(transport!, options.slowMo);
+    browser._downloadsPath = downloadsPath;
     (browser as any)['__server__'] = browserServer;
     return browser;
   }
@@ -68,7 +69,7 @@ export class WebKit implements BrowserType<WKBrowser> {
     return browser._defaultContext;
   }
 
-  private async _launchServer(options: LaunchServerOptions, launchType: LaunchType, userDataDir?: string): Promise<{ browserServer: BrowserServer, transport?: ConnectionTransport }> {
+  private async _launchServer(options: LaunchServerOptions, launchType: LaunchType, userDataDir?: string): Promise<{ browserServer: BrowserServer, transport?: ConnectionTransport, downloadsPath: string }> {
     const {
       ignoreDefaultArgs = false,
       args = [],
@@ -100,7 +101,7 @@ export class WebKit implements BrowserType<WKBrowser> {
     if (!webkitExecutable)
       throw new Error(`No executable path is specified.`);
 
-    const { launchedProcess, gracefullyClose } = await launchProcess({
+    const { launchedProcess, gracefullyClose, downloadsPath } = await launchProcess({
       executablePath: webkitExecutable,
       args: webkitArguments,
       env: { ...env, CURL_COOKIE_JAR_PATH: path.join(userDataDir, 'cookiejar.db') },
@@ -129,7 +130,7 @@ export class WebKit implements BrowserType<WKBrowser> {
     let browserServer: BrowserServer | undefined = undefined;
     transport = new PipeTransport(launchedProcess.stdio[3] as NodeJS.WritableStream, launchedProcess.stdio[4] as NodeJS.ReadableStream, () => browserServer!.close());
     browserServer = new BrowserServer(launchedProcess, gracefullyClose, launchType === 'server' ? wrapTransportWithWebSocket(transport, port || 0) : null);
-    return { browserServer, transport };
+    return { browserServer, transport, downloadsPath };
   }
 
   async connect(options: ConnectOptions): Promise<WKBrowser> {

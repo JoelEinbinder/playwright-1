@@ -17,6 +17,7 @@
 import { BrowserContext, BrowserContextOptions } from './browserContext';
 import { Page } from './page';
 import { EventEmitter } from 'events';
+import { Download } from './download';
 
 export interface Browser extends EventEmitter {
   newContext(options?: BrowserContextOptions): Promise<BrowserContext>;
@@ -24,14 +25,23 @@ export interface Browser extends EventEmitter {
   newPage(options?: BrowserContextOptions): Promise<Page>;
   isConnected(): boolean;
   close(): Promise<void>;
-  _setDebugFunction(debugFunction: (message: string) => void): void;
 }
 
-export async function createPageInNewContext(browser: Browser, options?: BrowserContextOptions): Promise<Page> {
-  const context = await browser.newContext(options);
-  const page = await context.newPage();
-  page._ownedContext = context;
-  return page;
+export abstract class BrowserBase extends EventEmitter implements Browser {
+  _downloadsPath: string = '';
+  protected _downloads = new Map<string, Download>();
+
+  abstract newContext(options?: BrowserContextOptions): Promise<BrowserContext>;
+  abstract contexts(): BrowserContext[];
+  abstract isConnected(): boolean;
+  abstract close(): Promise<void>;
+
+  async newPage(options?: BrowserContextOptions): Promise<Page> {
+    const context = await this.newContext(options);
+    const page = await context.newPage();
+    page._ownedContext = context;
+    return page;
+  }
 }
 
 export type LaunchType = 'local' | 'server' | 'persistent';

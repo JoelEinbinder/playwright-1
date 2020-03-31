@@ -132,12 +132,12 @@ module.exports.describe = ({testRunner, product, playwrightPath}) => {
       state._stdout.on('line', dumpout);
       state._stderr.on('line', dumperr);
       if (dumpProtocolOnFailure)
-        state.browser._setDebugFunction(data => test.output.push(`\x1b[32m[pw:protocol]\x1b[0m ${data}`));
+        debug('pw:protocol').output = data => test.output.push(`\x1b[32m[pw:protocol]\x1b[0m ${data}`);
       state.tearDown = async () => {
         state._stdout.off('line', dumpout);
         state._stderr.off('line', dumperr);
         if (dumpProtocolOnFailure)
-          state.browser._setDebugFunction(() => void 0);
+          debug('pw:protocol').output = console.log;
       };
     });
 
@@ -170,6 +170,7 @@ module.exports.describe = ({testRunner, product, playwrightPath}) => {
         loadTests('./click.spec.js');
         loadTests('./cookies.spec.js');
         loadTests('./dialog.spec.js');
+        loadTests('./download.spec.js');
         loadTests('./elementhandle.spec.js');
         loadTests('./emulation.spec.js');
         loadTests('./evaluation.spec.js');

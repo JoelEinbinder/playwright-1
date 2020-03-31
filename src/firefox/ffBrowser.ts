@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-import { Browser, createPageInNewContext } from '../browser';
+import { BrowserBase } from '../browser';
 import { assertBrowserContextIsNotOwned, BrowserContext, BrowserContextBase, BrowserContextOptions, validateBrowserContextOptions, verifyGeolocation } from '../browserContext';
 import { Events } from '../events';
 import { assert, helper, RegisteredListener } from '../helper';
@@ -27,9 +27,8 @@ import { ConnectionEvents, FFConnection } from './ffConnection';
 import { headersArray } from './ffNetworkManager';
 import { FFPage } from './ffPage';
 import { Protocol } from './protocol';
-import { EventEmitter } from 'events';
 
-export class FFBrowser extends EventEmitter implements Browser {
+export class FFBrowser extends BrowserBase {
   _connection: FFConnection;
   readonly _ffPages: Map<string, FFPage>;
   readonly _defaultContext: FFBrowserContext;
@@ -108,10 +107,6 @@ export class FFBrowser extends EventEmitter implements Browser {
     return Array.from(this._contexts.values());
   }
 
-  async newPage(options?: BrowserContextOptions): Promise<Page> {
-    return createPageInNewContext(this, options);
-  }
-
   _onDetachedFromTarget(payload: Protocol.Browser.detachedFromTargetPayload) {
     const ffPage = this._ffPages.get(payload.targetId)!;
     this._ffPages.delete(payload.targetId);
@@ -145,10 +140,6 @@ export class FFBrowser extends EventEmitter implements Browser {
     const disconnected = new Promise(f => this.once(Events.Browser.Disconnected, f));
     this._connection.close();
     await disconnected;
-  }
-
-  _setDebugFunction(debugFunction: debug.IDebugger) {
-    this._connection._debugProtocol = debugFunction;
   }
 }
 
@@ -306,6 +297,6 @@ export class FFBrowserContext extends BrowserContextBase {
     }
     await this._browser._connection.send('Browser.removeBrowserContext', { browserContextId: this._browserContextId });
     this._browser._contexts.delete(this._browserContextId);
-    this._didCloseInternal();
+    await this._didCloseInternal();
   }
 }

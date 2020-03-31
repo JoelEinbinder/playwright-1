@@ -28,13 +28,14 @@ export const ConnectionEvents = {
 // FFPlaywright uses this special id to issue Browser.close command which we
 // should ignore.
 export const kBrowserCloseMessageId = -9999;
+const debugProtocol = debug('pw:protocol');
+(debugProtocol as any).color = '34';
 
 export class FFConnection extends EventEmitter {
   private _lastId: number;
   private _callbacks: Map<number, {resolve: Function, reject: Function, error: Error, method: string}>;
   private _transport: ConnectionTransport;
   readonly _sessions: Map<string, FFSession>;
-  _debugProtocol = debug('pw:protocol');
   _closed: boolean;
 
   on: <T extends keyof Protocol.Events | symbol>(event: T, listener: (payload: T extends symbol ? any : Protocol.Events[T extends keyof Protocol.Events ? T : never]) => void) => this;
@@ -59,7 +60,6 @@ export class FFConnection extends EventEmitter {
     this.off = super.removeListener;
     this.removeListener = super.removeListener;
     this.once = super.once;
-    (this._debugProtocol as any).color = '34';
   }
 
   async send<T extends keyof Protocol.CommandParameters>(
@@ -78,14 +78,14 @@ export class FFConnection extends EventEmitter {
   }
 
   _rawSend(message: ProtocolRequest) {
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
+    if (debugProtocol.enabled)
+      debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
     this._transport.send(message);
   }
 
   async _onMessage(message: ProtocolResponse) {
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('◀ RECV ' + JSON.stringify(message));
+    if (debugProtocol.enabled)
+      debugProtocol('◀ RECV ' + JSON.stringify(message));
     if (message.id === kBrowserCloseMessageId)
       return;
     if (message.sessionId) {

@@ -205,7 +205,8 @@ function compareDocumentations(actual, expected) {
       [/Handle\<R\>/g, 'JSHandle'],
       [/JSHandle\<Object\>/g, 'JSHandle'],
       [/object/g, 'Object'],
-      [/Promise\<T\>/, 'Promise<Object>']
+      [/Promise\<T\>/, 'Promise<Object>'],
+      [/Readable/, 'stream.Readable']
     ]
     let actualName = actual.name;
     for (const replacer of mdReplacers)

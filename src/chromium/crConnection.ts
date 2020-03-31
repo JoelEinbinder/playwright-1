@@ -25,6 +25,9 @@ export const ConnectionEvents = {
   Disconnected: Symbol('ConnectionEvents.Disconnected')
 };
 
+const debugProtocol = debug('pw:protocol');
+(debugProtocol as any).color = '34';
+
 // CRPlaywright uses this special id to issue Browser.close command which we
 // should ignore.
 export const kBrowserCloseMessageId = -9999;
@@ -35,7 +38,6 @@ export class CRConnection extends EventEmitter {
   private readonly _sessions = new Map<string, CRSession>();
   readonly rootSession: CRSession;
   _closed = false;
-  _debugProtocol: debug.IDebugger;
 
   constructor(transport: ConnectionTransport) {
     super();
@@ -44,8 +46,6 @@ export class CRConnection extends EventEmitter {
     this._transport.onclose = this._onClose.bind(this);
     this.rootSession = new CRSession(this, '', 'browser', '');
     this._sessions.set('', this.rootSession);
-    this._debugProtocol = debug('pw:protocol');
-    (this._debugProtocol as any).color = '34';
   }
 
   static fromSession(session: CRSession): CRConnection {
@@ -61,15 +61,15 @@ export class CRConnection extends EventEmitter {
     const message: ProtocolRequest = { id, method, params };
     if (sessionId)
       message.sessionId = sessionId;
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
+    if (debugProtocol.enabled)
+      debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
     this._transport.send(message);
     return id;
   }
 
   async _onMessage(message: ProtocolResponse) {
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('◀ RECV ' + JSON.stringify(message));
+    if (debugProtocol.enabled)
+      debugProtocol('◀ RECV ' + JSON.stringify(message));
     if (message.id === kBrowserCloseMessageId)
       return;
     if (message.method === 'Target.attachedToTarget') {

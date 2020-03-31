@@ -340,6 +340,10 @@ export class WKPage implements PageDelegate {
     this._page._frameManager.frameLifecycleEvent(frameId, event);
   }
 
+  private _onDownloadCreated() {
+
+  }
+
   private _handleFrameTree(frameTree: Protocol.Page.FrameResourceTree) {
     this._onFrameAttached(frameTree.frame.id, frameTree.frame.parentId || null);
     this._onFrameNavigated(frameTree.frame, true);

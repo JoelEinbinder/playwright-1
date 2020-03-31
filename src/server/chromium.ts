@@ -47,8 +47,9 @@ export class Chromium implements BrowserType<CRBrowser> {
 
   async launch(options: LaunchOptions = {}): Promise<CRBrowser> {
     assert(!(options as any).userDataDir, 'userDataDir option is not supported in `browserType.launch`. Use `browserType.launchPersistentContext` instead');
-    const { browserServer, transport } = await this._launchServer(options, 'local');
+    const { browserServer, transport, downloadsPath } = await this._launchServer(options, 'local');
     const browser = await CRBrowser.connect(transport!, false, options.slowMo);
+    browser._downloadsPath = downloadsPath;
     (browser as any)['__server__'] = browserServer;
     return browser;
   }
@@ -68,7 +69,7 @@ export class Chromium implements BrowserType<CRBrowser> {
     return browser._defaultContext;
   }
 
-  private async _launchServer(options: LaunchServerOptions, launchType: LaunchType, userDataDir?: string): Promise<{ browserServer: BrowserServer, transport?: ConnectionTransport }> {
+  private async _launchServer(options: LaunchServerOptions, launchType: LaunchType, userDataDir?: string): Promise<{ browserServer: BrowserServer, transport?: ConnectionTransport, downloadsPath: string }> {
     const {
       ignoreDefaultArgs = false,
       args = [],
@@ -99,7 +100,7 @@ export class Chromium implements BrowserType<CRBrowser> {
     const chromeExecutable = executablePath || this._executablePath;
     if (!chromeExecutable)
       throw new Error(`No executable path is specified. Pass "executablePath" option directly.`);
-    const { launchedProcess, gracefullyClose } = await launchProcess({
+    const { launchedProcess, gracefullyClose, downloadsPath } = await launchProcess({
       executablePath: chromeExecutable,
       args: chromeArguments,
       env,
@@ -129,7 +130,7 @@ export class Chromium implements BrowserType<CRBrowser> {
     let browserServer: BrowserServer | undefined = undefined;
     transport = new PipeTransport(launchedProcess.stdio[3] as NodeJS.WritableStream, launchedProcess.stdio[4] as NodeJS.ReadableStream, () => browserServer!.close());
     browserServer = new BrowserServer(launchedProcess, gracefullyClose, launchType === 'server' ? wrapTransportWithWebSocket(transport, port) : null);
-    return { browserServer, transport };
+    return { browserServer, transport, downloadsPath };
   }
 
   async connect(options: ConnectOptions): Promise<CRBrowser> {

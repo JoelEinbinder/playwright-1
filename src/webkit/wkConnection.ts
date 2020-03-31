@@ -30,12 +30,14 @@ export const kBrowserCloseMessageId = -9999;
 export const kPageProxyMessageReceived = 'kPageProxyMessageReceived';
 export type PageProxyMessageReceivedPayload = { pageProxyId: string, message: any };
 
+const debugProtocol = debug('pw:protocol');
+(debugProtocol as any).color = '34';
+
 export class WKConnection {
   private readonly _transport: ConnectionTransport;
   private readonly _onDisconnect: () => void;
   private _lastId = 0;
   private _closed = false;
-  _debugProtocol = debug('pw:protocol');
 
   readonly browserSession: WKSession;
 
@@ -47,7 +49,6 @@ export class WKConnection {
     this.browserSession = new WKSession(this, '', 'Browser has been closed.', (message: any) => {
       this.rawSend(message);
     });
-    (this._debugProtocol as any).color = '34';
   }
 
   nextMessageId(): number {
@@ -55,14 +56,14 @@ export class WKConnection {
   }
 
   rawSend(message: ProtocolRequest) {
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
+    if (debugProtocol.enabled)
+      debugProtocol('SEND ► ' + rewriteInjectedScriptEvaluationLog(message));
     this._transport.send(message);
   }
 
   private _dispatchMessage(message: ProtocolResponse) {
-    if (this._debugProtocol.enabled)
-      this._debugProtocol('◀ RECV ' + message);
+    if (debugProtocol.enabled)
+      debugProtocol('◀ RECV ' + JSON.stringify(message));
     if (message.id === kBrowserCloseMessageId)
       return;
     if (message.pageProxyId) {
