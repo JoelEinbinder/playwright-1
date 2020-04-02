@@ -3006,7 +3006,7 @@ const path = await download.path();
 <!-- GEN:stop -->
 
 #### download.createReadStream()
-- returns: <[Promise]<null|[stream.Readable]>>
+- returns: <[Promise]<null|[Readable]>>
 
 Returns readable stream for current download or `null` if download failed.
 
@@ -4166,6 +4166,6 @@ const { chromium } = require('playwright');
 [number]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#Number_type "Number"
 [origin]: https://developer.mozilla.org/en-US/docs/Glossary/Origin "Origin"
 [selector]: https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Selectors "selector"
-[stream.Readable]: https://nodejs.org/api/stream.html#stream_class_stream_readable "stream.Readable"
+[Readable]: https://nodejs.org/api/stream.html#stream_class_stream_readable "Readable"
 [string]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#String_type "String"
 [xpath]: https://developer.mozilla.org/en-US/docs/Web/XPath "xpath"
