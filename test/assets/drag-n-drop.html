@@ -24,9 +24,9 @@ function dragover_handler(ev) {
 }
 
 function drop_handler(ev) {
-  console.log("Drop");
   ev.preventDefault();
   var data = ev.dataTransfer.getData("text");
+  console.log("Drop", JSON.stringify(data));
   ev.target.appendChild(document.getElementById(data));
 }
 </script>

@@ -18,9 +18,9 @@ import { it, expect, describe } from './fixtures';
 import { attachFrame } from './utils';
 
 describe('Drag and drop', test => {
-  test.fixme();
 }, () => {
-  it('should work', async ({server, page, context}) => {
+  it.only('should work', async ({server, page, context}) => {
+    page.on('console', console.log);
     await page.goto(server.PREFIX + '/drag-n-drop.html');
     await page.hover('#source');
     await page.mouse.down();
@@ -69,7 +69,7 @@ describe('Drag and drop', test => {
     ]);
   });
 
-  it('should drag into an iframe', async ({server, page, isFirefox}) => {
+  it.skip('should drag into an iframe', async ({server, page, isFirefox}) => {
     await page.goto(server.PREFIX + '/drag-n-drop.html');
     const frame = await attachFrame(page, 'oopif',server.CROSS_PROCESS_PREFIX + '/drag-n-drop.html');
     const pageEvents = await trackEvents(await page.$('body'));
@@ -92,7 +92,7 @@ describe('Drag and drop', test => {
     ]);
   });
 
-  it('should drag out of an iframe', async ({server, page}) => {
+  it.skip('should drag out of an iframe', async ({server, page}) => {
     await page.goto(server.PREFIX + '/drag-n-drop.html');
     const frame = await attachFrame(page, 'oopif',server.CROSS_PROCESS_PREFIX + '/drag-n-drop.html');
     const pageEvents = await trackEvents(await page.$('body'));
@@ -114,7 +114,7 @@ describe('Drag and drop', test => {
     ]);
   });
 
-  it('should drag through a navigation', async ({server, page, isFirefox}) => {
+  it.skip('should drag through a navigation', async ({server, page, isFirefox}) => {
     await page.goto(server.PREFIX + '/drag-n-drop.html');
     const beforeNavigationEvents = await trackEvents(await page.$('body'));
     await page.hover('#source');
